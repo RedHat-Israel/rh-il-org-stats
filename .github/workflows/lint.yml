@@ -1,0 +1,35 @@
+---
+name: Lint Project
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '.github/**'
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '.github/**'
+
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    name: Lint project
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+
+      - name: Install node 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: npm
+
+      - name: Install project modules
+        run: npm ci
+
+      - name: Lint source files
+        run: npm run lint

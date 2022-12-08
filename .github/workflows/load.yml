@@ -1,0 +1,50 @@
+---
+name: Load data
+
+on:
+  workflow_dispatch:
+  schedule:
+    # run every day at 02:00
+    - cron: '0 2 * * *'
+
+jobs:
+  load:
+    runs-on: ubuntu-latest
+    name: Lint project
+    environment: load
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+
+      - name: Configure git
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Install node 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+          cache: npm
+
+      - name: Install project modules
+        run: npm ci
+
+      - name: Load contributions
+        env:
+          ORG_GITHUB_TOKEN: ${{ secrets.ORG_GITHUB_TOKEN }}
+        run: npm run load-contributions
+
+      - name: Verify new contributions
+        id: verify_contributions
+        # exit-code will exit 1 if found diff
+        run: git diff --exit-code src/resources/contributions.json
+        continue-on-error: true
+
+      - name: Push new contributions
+        # success means no diff found
+        if: steps.verify_contributions.outcome != 'success'
+        run: |
+          git add src/resources/contributions.json
+          git commit -m "chore: updated contributions"
+          git push origin HEAD
