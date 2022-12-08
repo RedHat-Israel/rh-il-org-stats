@@ -42,8 +42,8 @@ jobs:
         continue-on-error: true
 
       - name: Push new contributions
-        # success means no diff found
-        if: steps.verify_contributions.outcome != 'success'
+        # failure (exit 1) means diff found - needs to push
+        if: steps.verify_contributions.outcome == 'failure'
         run: |
           git add src/resources/contributions.json
           git commit -m "chore: updated contributions"
