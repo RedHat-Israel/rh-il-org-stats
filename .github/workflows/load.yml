@@ -10,7 +10,7 @@ on:
 jobs:
   load:
     runs-on: ubuntu-latest
-    name: Lint project
+    name: Load project
     environment: load
     steps:
       - name: Checkout sources
